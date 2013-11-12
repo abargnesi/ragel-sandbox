@@ -5,10 +5,12 @@ machine bel;
   action return {fret;}
   action hold {fhold;}
   action call_set {fcall set;}
+  action call_term {fcall term;}
   action call_statement {fcall statement;}
   action out_docprop {puts "document property {#{name}: #{value}}"}
   action out_annotation {puts "annotation {#{name}: #{value}}"}
   action out_statement {puts "statement"}
+  action out_term {puts "term"}
 
   action s {
     buffer = []
@@ -63,23 +65,41 @@ machine bel;
 
   docprop = 
     DOC SP+ DOC_PROPS >s $n %name SP+ '='
-    SP+ (STRING | IDENT) >s $n %val %out_docprop SP* '\n'+ @return;
+    SP+ (STRING | IDENT) >s $n %val %out_docprop SP* '\n' @return;
   annotation =
     IDENT >s $n %name SP+ '=' SP+
-    (STRING | IDENT) >s $n %val %out_annotation SP* '\n'+ @return;
+    (STRING | IDENT) >s $n %val %out_annotation SP* '\n' @return;
   set :=
     (docprop | annotation);
-   
-  term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT)
-                     (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
+
+  term :=
+    FUNCTION '(' SP* 
+    (
+      (IDENT ':')? (STRING | IDENT) |
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
+    )
+    (
+      SP* ',' SP* 
+      (
+        (IDENT ':')? (STRING | IDENT) |
+        FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
+      )
+    )* SP* ')' @out_term @return;
+
   statement :=
-    term SP+ RELATIONSHIP SP+ term %out_statement SP* '\n'+ @return;
+    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term SP+
+    RELATIONSHIP SP+
+    (
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term SP*
+      |
+      '(' @call_statement ')'
+    ) '\n' @out_statement @return;
 
   main :=
     (
       '\n' |
       SET SP+ @call_set |
-      FUNCTION >{n = 0;} ${n += 1;} @{fpc -= n} @call_statement
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_statement
     )+;
 }%%
 =end
