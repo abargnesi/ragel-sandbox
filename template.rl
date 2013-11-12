@@ -27,4 +27,4 @@ class Parser
     %% write exec;
   end
 end
-Parser.new.exec($stdin)
+Parser.new.exec(ARGV[0] ? File.open(ARGV[0]) : $stdin)
