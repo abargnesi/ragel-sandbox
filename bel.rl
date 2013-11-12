@@ -3,9 +3,12 @@
 machine bel;
 
   action return {fret;}
+  action hold {fhold;}
   action call_set {fcall set;}
+  action call_statement {fcall statement;}
   action out_docprop {puts "document property {#{name}: #{value}}"}
   action out_annotation {puts "annotation {#{name}: #{value}}"}
+  action out_statement {puts "statement"}
 
   action s {
     buffer = []
@@ -67,10 +70,17 @@ machine bel;
   set :=
     (docprop | annotation);
    
-  term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT) (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
-  stmt = term SP+ RELATIONSHIP SP+ term @{puts "statement!"} SP* '\n'+;
+  term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT)
+                     (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
+  statement :=
+    term SP+ RELATIONSHIP SP+ term %out_statement SP* '\n'+ @return;
+
   main :=
-    (SET SP+ @call_set)+;
+    (
+      '\n' |
+      SET SP+ @call_set |
+      FUNCTION >{n = 0;} ${n += 1;} @{fpc -= n} @call_statement
+    )+;
 }%%
 =end
 
