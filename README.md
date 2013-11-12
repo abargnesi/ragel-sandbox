@@ -18,7 +18,16 @@ requirements
 + notify-send (libnotify)
 
 ```bash
-[tony@starship ragel-sandbox (master)]$ scripts/ragel-iterate.sh 
+# using ragel-build.sh to continually compile state machine
+[tony@starship ragel-sandbox (master)]$ scripts/ragel-build.sh 
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+# you make changes to any ../*.rl file
+building bel (bel.rl)
+
+# using ragel-statechart.sh to continually compile and view statechart
+# for state machine
+[tony@starship ragel-sandbox (master)]$ scripts/ragel-statechart.sh 
 Setting up watches.  Beware: since -r was given, this may take a while!
 Watches established.
 # you make changes to any ../*.rl file
