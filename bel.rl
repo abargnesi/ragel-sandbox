@@ -2,6 +2,11 @@
 %%{
 machine bel;
 
+  action return {fret;}
+  action call_set {fcall set;}
+  action out_docprop {puts "document property {#{name}: #{value}}"}
+  action out_annotation {puts "annotation {#{name}: #{value}}"}
+
   action s {
     buffer = []
   }
@@ -52,15 +57,20 @@ machine bel;
                   'hasMember'|'hasComponent');
   IDENT = [a-zA-Z0-9]+;
   STRING = '"' ([^"] | '\\\"')* '"';
-  set_document_header = SET SP+ DOC SP+ DOC_PROPS >s $n %name SP+ '='
-                        SP+ (STRING | IDENT) >s $n %val %{puts "document property {#{name}: #{value}}"} SP* '\n'+;
-  set_annotation = SET SP+ IDENT >s $n %name SP+ '='
-                   SP+ (STRING | IDENT) >s $n %val %{puts "annotation {#{name}: #{value}}"} SP* '\n'+;
+
+  docprop = 
+    DOC SP+ DOC_PROPS >s $n %name SP+ '='
+    SP+ (STRING | IDENT) >s $n %val %out_docprop SP* '\n'+ @return;
+  annotation =
+    IDENT >s $n %name SP+ '=' SP+
+    (STRING | IDENT) >s $n %val %out_annotation SP* '\n'+ @return;
+  set :=
+    (docprop | annotation);
    
   term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT) (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
   stmt = term SP+ RELATIONSHIP SP+ term @{puts "statement!"} SP* '\n'+;
-  record = set_document_header | set_annotation | stmt;
-  main := record+;
+  main :=
+    (SET SP+ @call_set)+;
 }%%
 =end
 
@@ -75,6 +85,8 @@ class Parser
   end
 
   def exec(input)
+    buffer = []
+    stack = []
     data = input.read.unpack('c*')
 
     %% write init;
