@@ -16,9 +16,6 @@ machine bel;
 }%%
 =end
 
-DocumentProperty = Struct.new(:property, :value)
-SetAnnotation = Struct.new(:property, :value)
-
 class Parser
 
   def initialize

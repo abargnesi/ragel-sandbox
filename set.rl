@@ -29,3 +29,22 @@
     )+;
 }%%
 =end
+
+class Parser
+
+  def initialize
+    @items = []
+    %% write data;
+  end
+
+  def exec(input)
+    buffer = []
+    stack = []
+    data = input.read.unpack('c*')
+
+    %% write init;
+    %% write exec;
+  end
+end
+Parser.new.exec(ARGV[0] ? File.open(ARGV[0]) : $stdin)
+
