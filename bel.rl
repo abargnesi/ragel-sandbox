@@ -58,7 +58,7 @@ machine bel;
                    SP+ (STRING | IDENT) >s $n %val %{puts "annotation {#{name}: #{value}}"} SP* '\n'+;
    
   term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT) (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
-  stmt = term SP+ RELATIONSHIP SP+ term @{puts "statement!"};
+  stmt = term SP+ RELATIONSHIP SP+ term @{puts "statement!"} SP* '\n'+;
   record = set_document_header | set_annotation | stmt;
   main := record+;
 }%%
