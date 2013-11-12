@@ -27,13 +27,39 @@ machine bel;
   DOC_PROPS = (/Name/i | /Description/i | /Version/i |
                          /Copyright/i | /Authors/i | /Licenses/i |
                          /ContactInfo/i);
+  FUNCTION     = ('proteinAbundance'|'p'|'rnaAbundance'|'r'|'abundance'|'a'|
+                  'microRNAAbundance'|'m'|'geneAbundance'|'g'|
+                  'biologicalProcess'|'bp'|'pathology'|'path'|
+                  'complexAbundance'|'complex'|'translocation'|'tloc'|
+                  'cellSecretion'|'sec'|'cellSurfaceExpression'|'surf'|
+                  'reaction'|'rxn'|'compositeAbundance'|'composite'|
+                  'fusion'|'fus'|'degradation'|'deg'|
+                  'molecularActivity'|'act'|'catalyticActivity'|'cat'|
+                  'kinaseActivity'|'kin'|'phosphataseActivity'|'phos'|
+                  'peptidaseActivity'|'pep'|'ribosylationActivity'|'ribo'|
+                  'transcriptionalActivity'|'tscript'|
+                  'transportActivity'|'tport'|'gtpBoundActivity'|'gtp'|
+                  'chaperoneActivity'|'chap'|'proteinModification'|'pmod'|
+                  'substitution'|'sub'|'truncation'|'trunc'|'reactants'|
+                  'products'|'list');
+  RELATIONSHIP = ('increases'|'->'|'decreases'|'-|'|'directlyIncreases'|'=>'|
+                  'directlyDecreases'|'=|'|'causesNoChange'|
+                  'positiveCorrelation'|'negativeCorrelation'|
+                  'translatedTo'|'>>'|'transcribedTo'|':>'|'isA'|
+                  'subProcessOf'|'rateLimitingStepOf'|'biomarkerFor'|
+                  'prognosticBiomarkerFor'|'orthologous'|'analogous'|
+                  'association'|'--'|'hasMembers'|'hasComponents'|
+                  'hasMember'|'hasComponent');
   IDENT = [a-zA-Z0-9]+;
   STRING = '"' ([^"] | '\\\"')* '"';
   set_document_header = SET SP+ DOC SP+ DOC_PROPS >s $n %name SP+ '='
                         SP+ (STRING | IDENT) >s $n %val %{puts "document property {#{name}: #{value}}"} SP* '\n'+;
   set_annotation = SET SP+ IDENT >s $n %name SP+ '='
                    SP+ (STRING | IDENT) >s $n %val %{puts "annotation {#{name}: #{value}}"} SP* '\n'+;
-  record = set_document_header | set_annotation;
+   
+  term = FUNCTION '(' SP* (IDENT ':')? (STRING | IDENT) (SP* ',' SP* (IDENT ':')? (STRING | IDENT))* SP* ')';
+  stmt = term SP+ RELATIONSHIP SP+ term @{puts "statement!"};
+  record = set_document_header | set_annotation | stmt;
   main := record+;
 }%%
 =end
