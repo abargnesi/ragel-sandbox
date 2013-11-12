@@ -3,7 +3,7 @@ ragel-sandbox
 
 A sandbox for ragel development.
 
-Development tools are in [scripts](https://github.com/abargnesi/ragel-sandbox/blob/master/README.md).
+Development tools are in [scripts](https://github.com/abargnesi/ragel-sandbox/blob/master/scripts/README.md).
 
 developing with the [kleene star](http://en.wikipedia.org/wiki/Kleene_star)
 ---------------------------------------------------------------------------
