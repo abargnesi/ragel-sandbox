@@ -18,14 +18,14 @@ requirements
 + notify-send (libnotify)
 
 ```bash
-[tony@starship ragel-sandbox (master #)]$ scripts/ragel-iterate.sh 
+[tony@starship ragel-sandbox (master)]$ scripts/ragel-iterate.sh 
 Setting up watches.  Beware: since -r was given, this may take a while!
 Watches established.
-# make changes to any ../*.rl file
+# you make changes to any ../*.rl file
 building template (template.rl)
   generated state chart (template.png)
   displaying state chart (template.png)
-# feh opens or reloads
+# then feh displays the state chart graph
 ```
 
 warnings
