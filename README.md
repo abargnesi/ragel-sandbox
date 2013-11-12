@@ -8,6 +8,8 @@ Development tools are in [scripts](https://github.com/abargnesi/ragel-sandbox/bl
 developing with the [kleene star](http://en.wikipedia.org/wiki/Kleene_star)
 ---------------------------------------------------------------------------
 
+(a.k.a. re-ragel zero or more times)
+
 requirements
 + ragel
 + feh
