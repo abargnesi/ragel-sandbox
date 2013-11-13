@@ -3,7 +3,7 @@
 machine bel;
 
   action call_term {fcall term;}
-  action out_term {puts "#{@term}";}
+  action out_term {puts 'out_term'; puts "#{@term}";}
   action term_init {
     term_stack = []
   }

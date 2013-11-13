@@ -34,7 +34,7 @@
                   'hasMember'|'hasComponent');
 
   statement :=
-    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP+ %statement_subject
+    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP* %statement_subject '\n'? @out_statement @return
     RELATIONSHIP SP+
     (
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term %statement_oterm SP* ')'? @return
@@ -50,10 +50,13 @@
 }%%
 =end
 
-# brings in BEL::Parameter and BEL::Term
-require './term.rb'
-
 module BEL
+  Parameter = Struct.new(:ns, :value)
+  Term = Struct.new(:fx, :args) do
+    def <<(item)
+      self.args << item
+    end
+  end
   Statement = Struct.new(:subject, :rel, :object, :comment) do
       def subject_only?
         !rel 
