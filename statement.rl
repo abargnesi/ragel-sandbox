@@ -3,7 +3,23 @@
   machine bel;
 
   action call_statement {fcall statement;}
-  action out_statement {puts "statement"}
+  action out_statement {puts "#{@statement}"}
+  action statement_init {
+    statement_stack = [@statement = BEL::Statement.new()]
+  }
+  action statement_subject {
+    statement_stack.last.subject = @term
+  }
+  action statement_oterm {
+    statement_stack.last.object = @term
+  }
+  action statement_ostmt {
+    statement_stack.last.object = BEL::Statement.new()
+    statement_stack.push statement_stack.last.object
+  }
+  action statement_pop {
+    @statement = statement_stack.pop
+  }
 
   include 'common.rl';
   include 'term.rl';
@@ -18,24 +34,38 @@
                   'hasMember'|'hasComponent');
 
   statement :=
-    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP+ %{puts "subject: #{@term}"}
+    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP+ %statement_subject
     RELATIONSHIP SP+
     (
-      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term %{puts "object: #{@term}"} SP* ')'? @return
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term %statement_oterm SP* ')'? @return
       |
-      '(' @call_statement ')'
+      '(' @statement_ostmt @call_statement %statement_pop
     ) '\n' @out_statement @return;
   
   statement_main :=
     (
       '\n' |
-      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_statement
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @statement_init @call_statement
     )+;
 }%%
 =end
 
 # brings in BEL::Parameter and BEL::Term
 require './term.rb'
+
+module BEL
+  Statement = Struct.new(:subject, :rel, :object, :comment) do
+      def subject_only?
+        !rel 
+      end  
+      def simple?
+        object.is_a? TermDefinition
+      end  
+      def nested?
+        object.is_a? StatementDefinition
+      end
+  end
+end
 
 class Parser
 
