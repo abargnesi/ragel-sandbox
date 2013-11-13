@@ -9,27 +9,27 @@
   }
   action statement_init {
     @statement = BEL::Statement.new()
-    statement_stack = [@statement]
+    @statement_stack = [@statement]
   }
   action statement_subject {
-    statement_stack.last.subject = @term
+    @statement_stack.last.subject = @term
   }
   action statement_oterm {
-    statement_stack.last.object = @term
+    @statement_stack.last.object = @term
   }
   action statement_ostmt {
     nested = BEL::Statement.new()
-    statement_stack.last.object = nested
-    statement_stack.push nested
+    @statement_stack.last.object = nested
+    @statement_stack.push nested
   }
   action statement_pop {
-    @statement = statement_stack.pop
+    @statement = @statement_stack.pop
   }
-  action rels {relbuffer = []}
-  action reln {relbuffer << fc}
+  action rels {@relbuffer = []}
+  action reln {@relbuffer << fc}
   action rele {
-    rel = relbuffer.map(&:chr).join()
-    statement_stack.last.rel = rel
+    rel = @relbuffer.map(&:chr).join()
+    @statement_stack.last.rel = rel
   }
 
   include 'common.rl';

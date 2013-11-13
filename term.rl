@@ -5,26 +5,26 @@ machine bel;
   action call_term {fcall term;}
   action out_term {puts 'out_term'; puts "#{@term}";}
   action term_init {
-    term_stack = []
+    @term_stack = []
   }
   action term_fx {
     fx = buffer.map(&:chr).join().to_sym
-    term_stack.push(BEL::Term.new(fx, []))
+    @term_stack.push(BEL::Term.new(fx, []))
     pfx = nil
     pbuf = []
   }
   action term_arg {
     val = pbuf.map(&:chr).join()
     if not val.empty?
-      term_stack.last << BEL::Parameter.new(pfx, val)
+      @term_stack.last << BEL::Parameter.new(pfx, val)
     end
     pbuf = []
     pfx = nil
   }
   action term_pop {
-    @term = term_stack.pop
-    if not term_stack.empty?
-      term_stack.last << @term
+    @term = @term_stack.pop
+    if not @term_stack.empty?
+      @term_stack.last << @term
     end
   }
   action pbuf {pbuf << fc}
