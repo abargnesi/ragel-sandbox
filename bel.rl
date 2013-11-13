@@ -10,8 +10,8 @@ machine bel;
   document_main :=
     (
       '\n' |
-      '#' any+ %{puts 'matched doc comment'} '\n' |
-      SET @call_set |
+      '#' [^\n]+ '\n' @{puts 'doc comment'} |
+      SET @{puts 'set!'} @call_set |
       UNSET @call_unset |
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n}
       @statement_init @call_statement
