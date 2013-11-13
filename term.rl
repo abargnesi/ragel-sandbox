@@ -3,19 +3,23 @@
 machine bel;
 
   action call_term {fcall term;}
-  action out_term {puts "term -> #{@term}";}
+  action out_term {puts "#{@term}";}
   action term_init {
     term_stack = []
   }
   action term_fx {
     fx = buffer.map(&:chr).join().to_sym
     term_stack.push(Term.new(fx, []))
-    pfxbuffer = []
-    valbuffer = []
+    pfx = nil
+    pbuf = []
   }
   action term_arg {
-    pfx = pfxbuffer.empty? ? nil : pfxbuffer.map(&:chr).join()
-    term_stack.last << Parameter.new(pfx, valbuffer.map(&:chr).join())
+    val = pbuf.map(&:chr).join()
+    if not val.empty?
+      term_stack.last << Parameter.new(pfx, val)
+    end
+    pbuf = []
+    pfx = nil
   }
   action term_pop {
     @term = term_stack.pop
@@ -23,9 +27,11 @@ machine bel;
       term_stack.last << @term
     end
   }
-
-  action pfxn {pfxbuffer << fc}
-  action valn {valbuffer << fc}
+  action pbuf {pbuf << fc}
+  action pns {
+    pfx = pbuf.map(&:chr).join()
+    pbuf = []
+  }
 
   include 'common.rl';
   
@@ -48,16 +54,16 @@ machine bel;
   term :=
     FUNCTION >s $n %term_fx '(' SP* 
     (
-      (IDENT $pfxn ':')? <: (STRING $valn | IDENT $valn) %term_arg |
+      (IDENT $pbuf ':')? @pns (STRING $pbuf | IDENT $pbuf) %term_arg |
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
     )
     (
       SP* ',' SP* 
       (
-        (IDENT ':')? (STRING | IDENT) |
+        (IDENT $pbuf ':')? @pns (STRING $pbuf | IDENT $pbuf) %term_arg |
         FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
       )
-    )* SP* ')' @term_pop @return;
+    )* ')' @term_pop @return;
 
   term_main :=
     (
