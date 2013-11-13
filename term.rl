@@ -74,12 +74,12 @@ machine bel;
 =end
 
 module BEL
+  Parameter = Struct.new(:ns, :value)
   Term = Struct.new(:fx, :args) do
     def <<(item)
       self.args << item
     end
   end
-  Parameter = Struct.new(:ns, :value)
 end
 
 class Parser

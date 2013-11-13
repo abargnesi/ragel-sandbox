@@ -10,11 +10,34 @@ machine bel;
   document_main :=
     (
       '\n' |
-      SET SP+ @call_set |
-      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_statement
+      SET @call_set |
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n}
+      @statement_init @call_statement
     )+;
 }%%
 =end
+
+module BEL
+  DocumentProperty = Struct.new(:name, :value)
+  Annotation = Struct.new(:name, :value)
+  Parameter = Struct.new(:ns, :value)
+  Term = Struct.new(:fx, :args) do
+    def <<(item)
+      self.args << item
+    end
+  end
+  Statement = Struct.new(:subject, :rel, :object, :comment) do
+      def subject_only?
+        !rel 
+      end  
+      def simple?
+        object.is_a? TermDefinition
+      end  
+      def nested?
+        object.is_a? StatementDefinition
+      end
+  end
+end
 
 class Parser
 
