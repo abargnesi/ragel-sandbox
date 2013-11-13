@@ -11,6 +11,16 @@
     annotation = BEL::Annotation.new(@name, @value)
     puts annotation
   }
+  action lists {
+    listvals = []
+    listbuffer = []
+  }
+  action listn {listbuffer << fc}
+  action liste {
+    listvals << listbuffer.map(&:chr).join()
+    listbuffer = []
+  }
+  action listv {@value = listvals}
 
   include 'common.rl';
 
@@ -25,7 +35,16 @@
     SP+ (STRING | IDENT) >s $n %val %out_docprop SP* '\n' @return;
   annotation =
     SP+ IDENT >s $n %name SP+ '=' SP+
-    (STRING | IDENT) >s $n %val %out_annotation SP* '\n' @return;
+    (
+      STRING >s $n %val |
+      IDENT >s $n %val  |
+      (
+        '{' @lists SP*
+          (STRING | IDENT) $listn SP*
+          (',' @liste SP* (STRING | IDENT) $listn SP*)*
+        '}' @liste @listv
+      )
+    ) %out_annotation SP* '\n' @return;
   set :=
     (docprop | annotation);
   set_main :=
