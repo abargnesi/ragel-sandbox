@@ -11,7 +11,7 @@ machine bel;
     (
       '\n' |
       '#' [^\n]+ '\n' @{puts 'doc comment'} |
-      SET @{puts 'set!'} @call_set |
+      SET @call_set |
       UNSET @call_unset |
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n}
       @statement_init @call_statement
