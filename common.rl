@@ -14,14 +14,14 @@ machine bel;
   }
 
   action name {
-    name = buffer.map(&:chr).join()
+    @name = buffer.map(&:chr).join()
   }
 
   action val {
     if buffer[0] == 34 && buffer[-1] == 34
       buffer = buffer[1...-1]
     end
-    value = buffer.map(&:chr).join()
+    @value = buffer.map(&:chr).join().gsub '\"', '"'
   }
 
   SP = ' ';

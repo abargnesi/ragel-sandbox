@@ -1,0 +1,4 @@
+SET DOCUMENT Name = "Test"
+SET Species = 9606
+SET Tissue = "lung fibroblasts"
+Set Evidence = "something to make you \"believe this\""

@@ -3,8 +3,14 @@
   machine bel;
 
   action call_set {fcall set;}
-  action out_docprop {puts "document property {#{name}: #{value}}"}
-  action out_annotation {puts "annotation {#{name}: #{value}}"}
+  action out_docprop {
+    docprop = BEL::DocumentProperty.new(@name, @value)
+    puts docprop
+  }
+  action out_annotation {
+    annotation = BEL::Annotation.new(@name, @value)
+    puts annotation
+  }
 
   include 'common.rl';
 
@@ -15,10 +21,10 @@
                /ContactInfo/i);
 
   docprop = 
-    DOC SP+ DOC_PROPS >s $n %name SP+ '='
+    SP+ DOC SP+ DOC_PROPS >s $n %name SP+ '='
     SP+ (STRING | IDENT) >s $n %val %out_docprop SP* '\n' @return;
   annotation =
-    IDENT >s $n %name SP+ '=' SP+
+    SP+ IDENT >s $n %name SP+ '=' SP+
     (STRING | IDENT) >s $n %val %out_annotation SP* '\n' @return;
   set :=
     (docprop | annotation);
@@ -29,6 +35,11 @@
     )+;
 }%%
 =end
+
+module BEL
+  DocumentProperty = Struct.new(:name, :value)
+  Annotation = Struct.new(:name, :value)
+end
 
 class Parser
 
