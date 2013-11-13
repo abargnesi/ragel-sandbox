@@ -3,7 +3,29 @@
 machine bel;
 
   action call_term {fcall term;}
-  action out_term {puts "term"}
+  action out_term {puts "term -> #{@term}";}
+  action term_init {
+    term_stack = []
+  }
+  action term_fx {
+    fx = buffer.map(&:chr).join().to_sym
+    term_stack.push(Term.new(fx, []))
+    pfxbuffer = []
+    valbuffer = []
+  }
+  action term_arg {
+    pfx = pfxbuffer.empty? ? nil : pfxbuffer.map(&:chr).join()
+    term_stack.last << Parameter.new(pfx, valbuffer.map(&:chr).join())
+  }
+  action term_pop {
+    @term = term_stack.pop
+    if not term_stack.empty?
+      term_stack.last << @term
+    end
+  }
+
+  action pfxn {pfxbuffer << fc}
+  action valn {valbuffer << fc}
 
   include 'common.rl';
   
@@ -24,9 +46,9 @@ machine bel;
               'products'|'list');
 
   term :=
-    FUNCTION '(' SP* 
+    FUNCTION >s $n %term_fx '(' SP* 
     (
-      (IDENT ':')? (STRING | IDENT) |
+      (IDENT $pfxn ':')? <: (STRING $valn | IDENT $valn) %term_arg |
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
     )
     (
@@ -35,15 +57,22 @@ machine bel;
         (IDENT ':')? (STRING | IDENT) |
         FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term
       )
-    )* SP* ')' @return;
+    )* SP* ')' @term_pop @return;
 
   term_main :=
     (
       '\n' |
-      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term '\n' @out_term
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term '\n' @out_term
     )+;
 }%%
 =end
+
+Term = Struct.new(:fx, :args) do
+  def <<(item)
+    self.args << item
+  end
+end
+Parameter = Struct.new(:ns, :value)
 
 class Parser
 
