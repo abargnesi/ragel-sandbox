@@ -18,10 +18,10 @@
                   'hasMember'|'hasComponent');
 
   statement :=
-    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term SP+
+    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP+ %{puts "subject: #{@term}"}
     RELATIONSHIP SP+
     (
-      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @call_term SP*
+      FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term %{puts "object: #{@term}"} SP* ')'? @return
       |
       '(' @call_statement ')'
     ) '\n' @out_statement @return;
@@ -33,6 +33,9 @@
     )+;
 }%%
 =end
+
+# brings in BEL::Parameter and BEL::Term
+require './term.rb'
 
 class Parser
 

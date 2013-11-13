@@ -1,0 +1,3 @@
+p(AKT1) -> p(AKT2)
+p(AKT1, pmod(S,T,465)) => p(HGNC:MYL9)
+p(HGNC:EIF4EBP1) -> (kin(p(EGID:2475)) => p(HGNC:EIF4EBP1,pmod(P,T,46)))

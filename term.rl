@@ -9,14 +9,14 @@ machine bel;
   }
   action term_fx {
     fx = buffer.map(&:chr).join().to_sym
-    term_stack.push(Term.new(fx, []))
+    term_stack.push(BEL::Term.new(fx, []))
     pfx = nil
     pbuf = []
   }
   action term_arg {
     val = pbuf.map(&:chr).join()
     if not val.empty?
-      term_stack.last << Parameter.new(pfx, val)
+      term_stack.last << BEL::Parameter.new(pfx, val)
     end
     pbuf = []
     pfx = nil
@@ -73,12 +73,14 @@ machine bel;
 }%%
 =end
 
-Term = Struct.new(:fx, :args) do
-  def <<(item)
-    self.args << item
+module BEL
+  Term = Struct.new(:fx, :args) do
+    def <<(item)
+      self.args << item
+    end
   end
+  Parameter = Struct.new(:ns, :value)
 end
-Parameter = Struct.new(:ns, :value)
 
 class Parser
 
