@@ -3,9 +3,13 @@
   machine bel;
 
   action call_statement {fcall statement;}
-  action out_statement {puts "#{@statement}"}
+  action statement {
+    @statement.annotations = annotations.clone()
+    statement_group.statements << @statement
+  }
   action statement_init {
-    statement_stack = [@statement = BEL::Statement.new()]
+    @statement = BEL::Statement.new()
+    statement_stack = [@statement]
   }
   action statement_subject {
     statement_stack.last.subject = @term
@@ -14,14 +18,22 @@
     statement_stack.last.object = @term
   }
   action statement_ostmt {
-    statement_stack.last.object = BEL::Statement.new()
-    statement_stack.push statement_stack.last.object
+    nested = BEL::Statement.new()
+    statement_stack.last.object = nested
+    statement_stack.push nested
   }
   action statement_pop {
     @statement = statement_stack.pop
   }
+  action rels {relbuffer = []}
+  action reln {relbuffer << fc}
+  action rele {
+    rel = relbuffer.map(&:chr).join()
+    statement_stack.last.rel = rel
+  }
 
   include 'common.rl';
+  include 'set.rl';
   include 'term.rl';
 
   RELATIONSHIP = ('increases'|'->'|'decreases'|'-|'|'directlyIncreases'|'=>'|                                                       
@@ -34,13 +46,13 @@
                   'hasMember'|'hasComponent');
 
   statement :=
-    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP* %statement_subject '\n'? @out_statement @return
-    RELATIONSHIP SP+
+    FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term SP* %statement_subject '\n'? @statement @return
+    RELATIONSHIP >rels $reln %rele SP+
     (
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n} @term_init @call_term %statement_oterm SP* ')'? @return
       |
       '(' @statement_ostmt @call_statement %statement_pop
-    ) '\n' @out_statement @return;
+    ) '\n' @statement @return;
   
   statement_main :=
     (
@@ -57,7 +69,7 @@ module BEL
       self.args << item
     end
   end
-  Statement = Struct.new(:subject, :rel, :object, :comment) do
+  Statement = Struct.new(:subject, :rel, :object, :annotations, :comment) do
       def subject_only?
         !rel 
       end  

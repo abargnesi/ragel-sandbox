@@ -10,7 +10,9 @@ machine bel;
   document_main :=
     (
       '\n' |
+      '#' any+ %{puts 'matched doc comment'} '\n' |
       SET @call_set |
+      UNSET @call_unset |
       FUNCTION >{n = 0} ${n += 1} @{fpc -= n}
       @statement_init @call_statement
     )+;
@@ -20,13 +22,14 @@ machine bel;
 module BEL
   DocumentProperty = Struct.new(:name, :value)
   Annotation = Struct.new(:name, :value)
+  StatementGroup = Struct.new(:name, :statements, :annotations)
   Parameter = Struct.new(:ns, :value)
   Term = Struct.new(:fx, :args) do
     def <<(item)
       self.args << item
     end
   end
-  Statement = Struct.new(:subject, :rel, :object, :comment) do
+  Statement = Struct.new(:subject, :rel, :object, :annotations, :comment) do
       def subject_only?
         !rel 
       end  
